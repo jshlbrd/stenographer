@@ -37,8 +37,8 @@ func (s *stenographerServer) RetrievePcap(
                 return nil
         }
 
-        uid, err := uuid.NewRandom().String()
-        if req.Uid == "" {
+        uid := uuid.New().String()
+        if req.Uid != "" {
                 uid = req.Uid
         }
 
