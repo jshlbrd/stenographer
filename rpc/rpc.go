@@ -12,6 +12,8 @@ import (
         "os"
         "os/exec"
         "path/filepath"
+
+        "github.com/google/uuid"
         "google.golang.org/grpc"
         "google.golang.org/grpc/credentials"
 
@@ -35,6 +37,11 @@ func (s *stenographerServer) RetrievePcap(
                 return nil
         }
 
+        uid, err := uuid.NewRandom().String()
+        if req.Uid == "" {
+                uid = req.Uid
+        }
+
         chunkSize := s.rpcCfg.PcapClientChunkSize
         if req.ChunkSize != 0 {
                 chunkSize = req.ChunkSize
@@ -45,7 +52,7 @@ func (s *stenographerServer) RetrievePcap(
                 maxSize = req.MaxSize
         }
 
-        pcapPath := filepath.Join(s.rpcCfg.PcapPath, fmt.Sprintf("%s.pcap", req.Uid))
+        pcapPath := filepath.Join(s.rpcCfg.PcapPath, fmt.Sprintf("%s.pcap", uid))
         cmd := exec.Command("stenoread", req.Query, "-w", pcapPath)
         if err := cmd.Run(); err != nil {
                 log.Printf("Rpc: Unable to run stenoread command: %v", err)
@@ -61,7 +68,7 @@ func (s *stenographerServer) RetrievePcap(
         buffer := make([]byte, chunkSize)
         for pcapOffset < maxSize {
                 if pcapOffset >= s.rpcCfg.PcapLimitSize {
-                        log.Printf("Rpc: Request %s hit size limit %d", req.Uid, s.rpcCfg.PcapLimitSize)
+                        log.Printf("Rpc: Request %s hit size limit %d", uid, s.rpcCfg.PcapLimitSize)
                         break
                 }
 
@@ -74,7 +81,7 @@ func (s *stenographerServer) RetrievePcap(
                         break
                 }
 
-                stream.Send(&pb.PcapResponse{Uid: req.Uid, Pcap: buffer[:bytesread]})
+                stream.Send(&pb.PcapResponse{Uid: uid, Pcap: buffer[:bytesread]})
         }
 
         if err := pcapFile.Close(); err != nil {
