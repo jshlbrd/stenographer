@@ -31,17 +31,17 @@ func (s *stenographerServer) RetrievePcap(
         req *pb.PcapRequest,
         stream pb.Stenographer_RetrievePcapServer,
 ) error {
-        if req.Query == nil {
+        if req.Query == "" {
                 return nil
         }
 
         chunkSize := s.rpcCfg.PcapClientChunkSize
-        if req.ChunkSize != nil {
+        if req.ChunkSize != 0 {
                 chunkSize = req.ChunkSize
         }
 
-        maxSize := s.rpcCfg.PcapClientChunkSize
-        if req.MaxSize != nil {
+        maxSize := s.rpcCfg.PcapClientMaxSize
+        if req.MaxSize != 0 {
                 maxSize = req.MaxSize
         }
 

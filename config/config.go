@@ -49,12 +49,14 @@ type ThreadConfig struct {
 
 // RpcConfig is a json-decoded configuration for running the gRPC server.
 type RpcConfig struct {
-        CaCert          string
-        ServerKey       string
-        ServerCert      string
-        Port            int
-        PcapPath        string
-        PcapLimitSize   int32
+        CaCert                  string
+        ServerKey               string
+        ServerCert              string
+        Port                    int
+        PcapPath                string
+        PcapLimitSize           int32
+        PcapClientChunkSize     int32
+        PcapClientMaxSize       int32
 }
 
 // Config is a json-decoded configuration for running stenographer.
