@@ -1,0 +1,18 @@
+syntax = "proto3";
+package steno;
+
+service Stenographer {
+  rpc RetrievePcap(PcapRequest) returns (stream PcapResponse) {}
+}
+
+message PcapRequest {
+  string uid = 1;
+  int32 chunk_size = 2;
+  int32 max_size = 3;
+  string query = 4;
+}
+
+message PcapResponse {
+  string uid = 1;
+  bytes pcap = 2;
+}

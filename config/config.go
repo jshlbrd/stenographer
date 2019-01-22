@@ -47,8 +47,19 @@ type ThreadConfig struct {
 	MaxDirectoryFiles  int `json:",omitempty"`
 }
 
+// RpcConfig is a json-decoded configuration for running the gRPC server.
+type RpcConfig struct {
+        CaCert          string
+        ServerKey       string
+        ServerCert      string
+        Port            int
+        PcapPath        string
+        PcapLimitSize   int32
+}
+
 // Config is a json-decoded configuration for running stenographer.
 type Config struct {
+        Rpc           *RpcConfig
 	StenotypePath string
 	Threads       []ThreadConfig
 	Interface     string
