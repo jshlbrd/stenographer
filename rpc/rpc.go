@@ -83,7 +83,7 @@ func (s *stenographerServer) RetrievePcap(
                 return nil
         }
 
-        var pcapOffset int32 = 0
+        var pcapOffset int64 = 0
         buffer := make([]byte, chunkSize)
         for pcapOffset < maxSize {
                 if pcapOffset >= s.rpcCfg.PcapLimitSize {
