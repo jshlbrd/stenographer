@@ -27,6 +27,13 @@ type stenographerServer struct {
         rpcCfg *config.RpcConfig
 }
 
+// Removes file from disk, primarily used to clean up during calls to RetrievePcap.
+func removeFile(path string) {
+        if err := os.Remove(path); err != nil {
+                log.Printf("Rpc: Unable to remove file %s: %v", path, err)
+        }
+}
+
 // Implements RetrievePcap call which takes a client query request, applies it
 // to stenoread, and streams the PCAP back to the client.
 func (s *stenographerServer) RetrievePcap(
@@ -58,9 +65,21 @@ func (s *stenographerServer) RetrievePcap(
                 log.Printf("Rpc: Unable to run stenoread command: %v", err)
                 return nil
         }
+        pcapStat, err := os.Stat(pcapPath)
+        if err != nil {
+                log.Printf("Rpc: Unable to stat PCAP file %s: %v", pcapPath, err)
+                removeFile(pcapPath)
+                return nil
+        }
+        // A PCAP file with no packets should always contain exactly 24 bytes
+        if pcapStat.Size() == 24 {
+                removeFile(pcapPath)
+                return nil
+        }
         pcapFile, err := os.Open(pcapPath)
         if err != nil {
                 log.Printf("Rpc: Unable to open PCAP file %s: %v", pcapPath, err)
+                removeFile(pcapPath)
                 return nil
         }
 
@@ -87,9 +106,7 @@ func (s *stenographerServer) RetrievePcap(
         if err := pcapFile.Close(); err != nil {
                 log.Printf("Rpc: Unable to close PCAP file %s: %v", pcapPath, err)
         }
-        if err := os.Remove(pcapPath); err != nil {
-                log.Printf("Rpc: Unable to remove PCAP file %s: %v", pcapPath, err)
-        }
+        removeFile(pcapPath)
 
         return nil
 }
