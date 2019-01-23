@@ -1,4 +1,19 @@
-// Package rpc implements an optional, secure gRPC server.
+// Copyright 2019 Josh Liburdi and Google Inc. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Package rpc implements an optional, secure gRPC server for interacting
+// with Stenographer. The gRPC service is defined in protobuf/steno.proto.
 package rpc
 
 import (
@@ -92,7 +107,7 @@ func (s *stenographerServer) RetrievePcap(
                 }
 
                 pcapOffset += clientChunkSize
-                bytesread, err := pcapFile.Read(buffer)
+                bytesRead, err := pcapFile.Read(buffer)
                 if err != nil {
                         if err != io.EOF {
                                 log.Printf("Rpc: Non-EOF error when reading PCAP %s: %v", pcapPath, err)
@@ -100,7 +115,7 @@ func (s *stenographerServer) RetrievePcap(
                         break
                 }
 
-                stream.Send(&pb.PcapResponse{Uid: uid, Pcap: buffer[:bytesread]})
+                stream.Send(&pb.PcapResponse{Uid: uid, Pcap: buffer[:bytesRead]})
         }
 
         if err := pcapFile.Close(); err != nil {
