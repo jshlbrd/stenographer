@@ -52,11 +52,11 @@ type RpcConfig struct {
         CaCert                  string
         ServerKey               string
         ServerCert              string
-        Port                    int
-        PcapPath                string
-        PcapLimitSize           int64
-        PcapClientChunkSize     int64
-        PcapClientMaxSize       int64
+        ServerPort              int
+        ServerPcapPath          string
+        ServerPcapMaxSize       int64
+        ClientPcapChunkSize     int64
+        ClientPcapMaxSize       int64
 }
 
 // Config is a json-decoded configuration for running stenographer.

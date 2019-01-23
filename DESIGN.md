@@ -287,12 +287,12 @@ gRPC support is optional and can be enabled by adding an Rpc dictionary of setti
 , "Rpc": { "CaCert": "/path/to/rpc/ca/cert"
          , "ServerKey": "/path/to/rpc/key"
          , "ServerCert": "/path/to/rpc/cert"
-         , "Port": 8443
-         , "PcapPath": "/path/to/rpc/pcap/directory"
-         , "PcapLimitSize": 1000000000
-         , "PcapClientChunkSize": 1000
-         , "PcapClientMaxSize": 5000000
-   }
+         , "ServerPort": 8443
+         , "ServerPcapPath": "/path/to/rpc/pcap/directory"
+         , "ServerPcapMaxSize": 1000000000
+         , "ClientPcapChunkSize": 1000
+         , "ClientPcapMaxSize": 5000000
+  }
 ```
 
 #### RetrievePcap ####
@@ -311,6 +311,12 @@ with grpc.secure_channel(server, creds) as channel:
         for response in stub.RetrievePcap(pb):
             fout.write(response.pcap)
 ```
+
+`RetrievePcap` requires the gRPC server to be configured with the following fields (in addition to any fields that require the server to startup):
+- ServerPcapPath: local path to the directory where `stenoread` PCAP is temporarily stored
+- ServerPcapMaxSize: upper limit on how much PCAP a client is allowed to receive (used to restrict clients from receiving excessively large PCAPs)
+- ClientPcapChunkSize: size of the PCAP chunks to stream to the client (used if the client has not specified a size in the request)
+- ClientPcapMaxSize: upper limit on how much PCAP a client will receive (used if the client has not specified a size in the request)
 
 ### Defense In Depth ###
 

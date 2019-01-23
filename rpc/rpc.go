@@ -49,17 +49,17 @@ func (s *stenographerServer) RetrievePcap(
                 uid = req.Uid
         }
 
-        chunkSize := s.rpcCfg.PcapClientChunkSize
+        clientChunkSize := s.rpcCfg.ClientPcapChunkSize
         if req.ChunkSize != 0 {
-                chunkSize = req.ChunkSize
+                clientChunkSize = req.ChunkSize
         }
 
-        maxSize := s.rpcCfg.PcapClientMaxSize
+        clientMaxSize := s.rpcCfg.ClientPcapMaxSize
         if req.MaxSize != 0 {
-                maxSize = req.MaxSize
+                clientMaxSize = req.MaxSize
         }
 
-        pcapPath := filepath.Join(s.rpcCfg.PcapPath, fmt.Sprintf("%s.pcap", uid))
+        pcapPath := filepath.Join(s.rpcCfg.ServerPcapPath, fmt.Sprintf("%s.pcap", uid))
         cmd := exec.Command("stenoread", req.Query, "-w", pcapPath)
         if err := cmd.Run(); err != nil {
                 log.Printf("Rpc: Unable to run stenoread command: %v", err)
@@ -84,14 +84,14 @@ func (s *stenographerServer) RetrievePcap(
         }
 
         var pcapOffset int64 = 0
-        buffer := make([]byte, chunkSize)
-        for pcapOffset < maxSize {
-                if pcapOffset >= s.rpcCfg.PcapLimitSize {
-                        log.Printf("Rpc: Request %s hit size limit %d", uid, s.rpcCfg.PcapLimitSize)
+        buffer := make([]byte, clientChunkSize)
+        for pcapOffset < clientMaxSize {
+                if pcapOffset >= s.rpcCfg.ServerPcapMaxSize {
+                        log.Printf("Rpc: Request %s hit size limit %d", uid, s.rpcCfg.ServerPcapMaxSize)
                         break
                 }
 
-                pcapOffset += chunkSize
+                pcapOffset += clientChunkSize
                 bytesread, err := pcapFile.Read(buffer)
                 if err != nil {
                         if err != io.EOF {
@@ -115,7 +115,7 @@ func (s *stenographerServer) RetrievePcap(
 // certificates, and runs the gRPC server.
 func RunStenorpc(rpcCfg *config.RpcConfig) {
         log.Print("Starting stenorpc")
-        listener, err := net.Listen("tcp", fmt.Sprintf(":%d", rpcCfg.Port))
+        listener, err := net.Listen("tcp", fmt.Sprintf(":%d", rpcCfg.ServerPort))
         if err != nil {
                 log.Printf("Rpc: Failed to start server: %v", err)
                 return
